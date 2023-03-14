@@ -1,8 +1,11 @@
 package com.example.stocky.data.repository
 
 import coil.network.HttpException
+import com.example.stocky.data.csv.CSVParser
+import com.example.stocky.data.csv.CompanyListingsParser
 import com.example.stocky.data.local.StockDatabase
 import com.example.stocky.data.mapper.toCompanyListing
+import com.example.stocky.data.mapper.toCompanyListingEntity
 import com.example.stocky.data.remote.StockApi
 import com.example.stocky.data.remote.StockApi.Companion.API_KEY
 import com.example.stocky.domain.model.CompanyListing
@@ -17,7 +20,8 @@ import javax.inject.Inject
 @Singleton
 class StockRepositoryImpl @Inject constructor(
     private val api : StockApi,
-    private val db : StockDatabase
+    private val db : StockDatabase,
+    private val companyListingsParser: CSVParser<CompanyListing>
 ): StockRepository{
 
     private val dao = db.dao
@@ -41,15 +45,34 @@ class StockRepositoryImpl @Inject constructor(
             val remoteListings = try {
                 val response = api.getListings(API_KEY)
                 response.byteStream()
+                companyListingsParser.parse(response.byteStream())
+
             }catch (e : IOException){
                 e.printStackTrace()
                 emit(Resource.Error("couldn"))
+                null
 
             }catch (e : HttpException){
                 e.printStackTrace()
                 emit(Resource.Error("couldn"))
+                null
             }
 
+
+            remoteListings?.let {listings->
+                dao.clearCompanyListings()
+                dao.insertCompanyListings(
+                    listings.map { it.toCompanyListingEntity() }
+                )
+                emit(Resource.Success(
+                    dao
+                        .searchCompany("")
+                        .map { it.toCompanyListing() }
+
+                ))
+
+                emit(Resource.Loading(false))
+            }
 
         }
     }

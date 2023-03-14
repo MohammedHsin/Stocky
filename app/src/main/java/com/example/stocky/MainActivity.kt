@@ -28,7 +28,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     
-                    DestinationsNavHost(navGraph = NavGraphs.root)
+//                    DestinationsNavHost(navGraph = NavGraphs.root)
 
                 }
             }

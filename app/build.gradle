@@ -9,6 +9,13 @@ plugins {
 }
 
 android {
+
+    applicationVariants.all { variant ->
+        variant.addJavaSourceFoldersToModel(
+                new File(buildDir, "generated/ksp/${variant.name}/kotlin")
+        )
+    }
+
     namespace 'com.example.stocky'
     compileSdk 33
 
@@ -100,12 +107,16 @@ dependencies {
     implementation 'io.github.raamcosta.compose-destinations:core:1.1.2-beta'
     ksp 'io.github.raamcosta.compose-destinations:ksp:1.1.2-beta'
 
+
     // Coil
     implementation "io.coil-kt:coil-compose:1.4.0"
 
     implementation "com.google.accompanist:accompanist-swiperefresh:0.24.2-alpha"
 
     implementation 'com.opencsv:opencsv:5.5.2'
+
+    implementation("com.squareup.moshi:moshi:1.14.0")
+    implementation "com.squareup.retrofit2:converter-moshi:2.4.0"
 }
 
 kapt {
